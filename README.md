@@ -4,38 +4,10 @@ Optimism Stack Architecture
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '16px', 'fontFamily': 'arial' }}}%%
 graph TB
-    subgraph L1[Layer 1]
-        Eth[Ethereum]
-        Inbox[Batch Inbox]
-        Portal[Portal]
-        Bridge1[L1 Bridge]
-        Msg1[L1 Messenger]
-    end
-
-    subgraph Core[OP Stack Core]
-        direction TB
-        
-        subgraph DA[Data Layer]
-            EthDA[Eth DA]
-            AltDA[Alt DA]
-        end
-        
-        subgraph DL[Derivation]
-            Node[op-node]
-        end
-        
-        subgraph EL[Execution]
-            Geth[op-geth]
-        end
-        
-        subgraph SL[Sequencing]
-            Batch[Batcher]
-            Prop[Proposer]
-        end
-
-        subgraph ST[Settlement]
-            Proof[Fault Proof]
-        end
+    subgraph Users[Users]
+        End[End Users]
+        Apps[DApps]
+        Wallet[Wallets]
     end
 
     subgraph L2[Layer 2]
@@ -44,42 +16,57 @@ graph TB
         Msg2[L2 Messenger]
     end
 
-    subgraph Users[Users]
-        End[End Users]
-        Apps[DApps]
-        Wallet[Wallets]
+    subgraph Core[OP Stack Core]
+        direction TB
+        
+        subgraph SL[Sequencing]
+            Seq[Sequencer]
+            Batch[Batcher]
+            Prop[Proposer]
+        end
+        
+        subgraph EL[Execution]
+            Geth[op-geth]
+        end
+        
+        subgraph DL[Derivation]
+            Node[op-node]
+        end
+
+        subgraph ST[Settlement]
+            Proof[Fault Proof]
+        end
     end
 
-    subgraph Nodes[Operators]
-        Seq[Sequencer]
-        Ver[Verifier]
-        Chal[Challenger]
+    subgraph L1[Layer 1]
+        Eth[Ethereum]
+        Inbox[Batch Inbox]
+        Portal[Portal]
+        Bridge1[L1 Bridge]
+        Msg1[L1 Messenger]
     end
 
-    %% Key Flows
-    End --> Wallet --> Apps
-    Apps -->|Tx| Geth
-    End -->|Bridge| Bridge1
-    
-    Bridge1 <--> Portal
-    Portal <--> Msg1
-    Msg1 <--> Msg2
-    
-    Geth -->|Execute| Chain
-    Node -->|Drive| Geth
-    Batch -->|Submit| Inbox
-    Inbox --> Node
-    
-    Prop -->|State| Portal
+    %% User Normal Transaction Flow
+    End --> Wallet
+    Wallet --> Apps
+    Apps --> Seq
+    Seq --> Geth
+    Geth --> Chain
+
+    %% Batch Processing Flow
+    Batch --> Inbox
+    Node --> Geth
+    Prop --> Portal
+
+    %% Bridge Flow
+    End --- Bridge2
+    Bridge2 --- Msg2
+    Msg2 --- Msg1
+    Msg1 --- Bridge1
+
+    %% Verification
     Portal --> Proof
-    Chal -->|Challenge| Proof
     
-    EthDA --> Node
-    AltDA -.-> Node
-    
-    Seq -->|Run| Geth
-    Ver -->|Verify| Node
-
-    Chain --> Bridge2
-    Bridge2 <--> Msg2
+    %% L1 Data
+    Inbox --> Node
 ```
