@@ -1,5 +1,5 @@
 # Optimism-Stack-Architecture
-Optimism Stack Architecture
+Optimism Stack (OP Stack) is a modular architecture for building L2 blockchain solutions.
 
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '16px', 'fontFamily': 'arial' }}}%%
