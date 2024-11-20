@@ -2,99 +2,84 @@
 Optimism Stack Architecture
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '16px', 'fontFamily': 'arial' }}}%%
 graph TB
-    subgraph "Layer 1 (Ethereum)"
-        L1[L1 Blockchain]
-        BatchInbox[Batch Inbox]
-        Portal[OptimismPortal]
-        L1Bridge[L1 Bridge Contracts]
-        L1CrossDomain[L1 CrossDomain Messenger]
-        DisputeGame[Dispute Game Factory]
-        SystemConfig[System Config]
+    subgraph L1[Layer 1]
+        Eth[Ethereum]
+        Inbox[Batch Inbox]
+        Portal[Portal]
+        Bridge1[L1 Bridge]
+        Msg1[L1 Messenger]
     end
 
-    subgraph "OP Stack Core Components"
+    subgraph Core[OP Stack Core]
         direction TB
         
-        subgraph "Data Availability Layer"
-            EthDA[Ethereum DA]
-            AltDA[Alternative DA]
+        subgraph DA[Data Layer]
+            EthDA[Eth DA]
+            AltDA[Alt DA]
         end
         
-        subgraph "Derivation Layer"
-            OpNode[op-node<br/>Consensus Client]
+        subgraph DL[Derivation]
+            Node[op-node]
         end
         
-        subgraph "Execution Layer"
-            OpGeth[op-geth<br/>EVM Engine]
+        subgraph EL[Execution]
+            Geth[op-geth]
         end
         
-        subgraph "Sequencing Layer"
-            Batcher[op-batcher]
-            Proposer[op-proposer]
+        subgraph SL[Sequencing]
+            Batch[Batcher]
+            Prop[Proposer]
         end
 
-        subgraph "Settlement Layer"
-            FaultProof[Fault Proof System]
-            ProofSubmission[Proof Submission]
+        subgraph ST[Settlement]
+            Proof[Fault Proof]
         end
     end
 
-    subgraph "Layer 2"
-        L2[L2 Blockchain]
-        L2Bridge[L2 Bridge]
-        L2CrossDomain[L2 CrossDomain Messenger]
-        Predeploys[System Contracts]
+    subgraph L2[Layer 2]
+        Chain[L2 Chain]
+        Bridge2[L2 Bridge]
+        Msg2[L2 Messenger]
     end
 
-    subgraph "User Interactions"
-        Users[End Users]
-        Dapps[DApps]
-        Wallets[Wallets]
+    subgraph Users[Users]
+        End[End Users]
+        Apps[DApps]
+        Wallet[Wallets]
     end
 
-    subgraph "Node Operators"
-        Sequencer[Sequencer]
-        Verifier[Verifier Nodes]
-        Challenger[Challengers]
+    subgraph Nodes[Operators]
+        Seq[Sequencer]
+        Ver[Verifier]
+        Chal[Challenger]
     end
 
-    %% User Transaction Flow
-    Users --> Wallets
-    Wallets --> Dapps
-    Dapps -->|Submit L2 Tx| OpGeth
-    Users -->|Bridge Assets| L1Bridge
+    %% Key Flows
+    End --> Wallet --> Apps
+    Apps -->|Tx| Geth
+    End -->|Bridge| Bridge1
     
-    %% L1 -> L2 Flow
-    L1Bridge <--> Portal
-    Portal <--> L1CrossDomain
-    L1CrossDomain <--> L2CrossDomain
+    Bridge1 <--> Portal
+    Portal <--> Msg1
+    Msg1 <--> Msg2
     
-    %% Sequencing Flow
-    OpGeth -->|Execute Tx| L2
-    OpNode -->|Drive| OpGeth
-    Batcher -->|Submit Batches| BatchInbox
-    BatchInbox --> OpNode
+    Geth -->|Execute| Chain
+    Node -->|Drive| Geth
+    Batch -->|Submit| Inbox
+    Inbox --> Node
     
-    %% Settlement Flow
-    Proposer -->|Submit State| Portal
-    Portal --> DisputeGame
-    Challenger -->|Challenge| DisputeGame
-    DisputeGame --> FaultProof
+    Prop -->|State| Portal
+    Portal --> Proof
+    Chal -->|Challenge| Proof
     
-    %% Data Flow
-    EthDA --> OpNode
-    AltDA -.->|Optional| OpNode
+    EthDA --> Node
+    AltDA -.-> Node
     
-    %% Node Operations
-    Sequencer -->|Operate| OpGeth
-    Verifier -->|Verify| OpNode
-    
-    %% System Config
-    SystemConfig -.->|Configure| OpNode
-    SystemConfig -.->|Configure| OpGeth
+    Seq -->|Run| Geth
+    Ver -->|Verify| Node
 
-    %% L2 Components
-    L2 --> Predeploys
-    L2Bridge <--> L2CrossDomain
+    Chain --> Bridge2
+    Bridge2 <--> Msg2
 ```
