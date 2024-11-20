@@ -117,7 +117,14 @@ graph TB
 - User transactions -> Sequencer
 - Sequencer -> op-geth
 - op-geth -> L2 state update
-
+### Batch Processing Flow
+- Batcher -> L1 Batch Inbox
+- op-node reads data from L1
+- Drives op-geth state updates
+### State Validation Flow
+- Proposer submits state to Portal
+- Validation through Fault Proof system
+- Ensures state correctness
 
 
 
